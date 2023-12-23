@@ -8,6 +8,8 @@ import NoteList from "./Components/NoteList";
 
 import NewNote from "./Components/NewNote";
 import NoteLayout from "./Components/NoteLayout";
+import Note from "./Components/Note";
+import EditNote from "./Components/EditNote";
 
 export type Note = {
   id: string;
@@ -56,6 +58,24 @@ function App() {
     });
   };
 
+  const onUpdateNote = (id: string, { tags, ...data }: NoteData) => {
+    setNotes((prevNotes) => {
+      return prevNotes.map((note) => {
+        if (note.id === id) {
+          return { ...note, ...data, tagIds: tags.map((tag) => tag.id) };
+        } else {
+          return note;
+        }
+      });
+    });
+  };
+
+  const onDeleteNote = (id: string) => {
+    setNotes((prevNotes) => {
+      return prevNotes.filter((note) => note.id !== id);
+    });
+  };
+
   const addTag = (tag: Tag) => {
     setTags((prevTags) => [...prevTags, tag]);
   };
@@ -77,9 +97,19 @@ function App() {
             />
           }
         />
+
         <Route path="/:id" element={<NoteLayout notes={notesWithTags} />}>
-          <Route index element={<h1>Show</h1>} />
-          <Route path="edit" element={<h1>Edit</h1>} />
+          <Route index element={<Note onDelete={onDeleteNote} />} />
+          <Route
+            path="edit"
+            element={
+              <EditNote
+                onSubmit={onUpdateNote}
+                onAddTag={addTag}
+                availableTags={tags}
+              />
+            }
+          />
         </Route>
         <Route path="*" element={<Navigate to="." />} />
       </Routes>
